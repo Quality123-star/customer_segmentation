@@ -1,0 +1,8 @@
+pandas==2.2.2
+numpy==2.1.1
+scikit-learn==1.6.0
+matplotlib==3.9.2
+seaborn==0.13.2
+plotly==5.20.0          # for interactive 3D charts (optional but nice)
+joblib==1.4.2
+streamlit==1.25.0       # latest stable version
