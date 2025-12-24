@@ -1,10 +1,5 @@
-from segmentation.inference import CustomerSegmentationModel
+from segmentation.inference import predict_customer_segment, get_all_customers
 
-model = CustomerSegmentationModel(
-    "models/kmeans_model.pkl",
-    "models/scaler.pkl",
-    "models/cluster_metadata.pkl"
-)
-
-result = model.predict(age=30, income=60, spending=75)
+result = predict_customer_segment(age=30, income=70, spending=50)
 print(result)
+
