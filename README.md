@@ -1,20 +1,15 @@
-# Customer Segmentation Project
+# 🛍 Customer Segmentation App
 
-## Overview
-This project segments customers using KMeans clustering based on Age, Annual Income, and Spending Score.  
+This Streamlit app uses K-Means clustering to segment mall customers
+based on age, income, and spending score.
 
-Features:
-- Predict cluster for a single customer
-- Batch predictions via CSV
-- Interactive 3D cluster visualization
-- Cluster summary statistics
-- Automatic cluster naming
+### Features
+- Predict customer segment
+- View cluster summaries
+- Interactive 3D visualization
 
----
-
-## Getting Started
-
-1. Install dependencies:
-
-```bash
-pip install -r requirements.txt
+### Tech Stack
+- Python
+- Scikit-learn
+- Streamlit
+- Plotly
