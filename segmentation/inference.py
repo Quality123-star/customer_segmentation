@@ -36,3 +36,13 @@ def get_all_customers():
     df["Cluster_ID"] = kmeans_model.predict(X_scaled)
     df["Cluster_Name"] = df["Cluster_ID"].map(cluster_names)
     return df
+
+
+def get_cluster_centroids():
+    centroids_scaled = kmeans_model.cluster_centers_
+    centroids = scaler.inverse_transform(centroids_scaled)
+
+    return pd.DataFrame(
+        centroids,
+        columns=["Age", "Annual Income (k$)", "Spending Score (1-100)"]
+    )
