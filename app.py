@@ -1,74 +1,40 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.express as px
-import joblib
-from segmentation.inference import CustomerSegmentationModel
+from segmentation.inference import predict_customer_segment, get_all_customers
 
-# Load artifacts
-model = CustomerSegmentationModel(
-    "models/kmeans_model.pkl",
-    "models/scaler.pkl",
-    "models/cluster_metadata.pkl"
-)
+st.set_page_config(page_title="Customer Segmentation", layout="wide")
 
-st.set_page_config(page_title="Customer Segmentation App", layout="wide")
-st.title("🛍️ Customer Segmentation Dashboard")
+st.title("🛍 Customer Segmentation Dashboard")
 
-# --- Sidebar: Input customer details ---
+# Sidebar for new customer input
 st.sidebar.header("Predict Customer Segment")
-
 age = st.sidebar.slider("Age", 18, 70, 30)
-income = st.sidebar.slider("Annual Income (k$)", 10, 150, 60)
+income = st.sidebar.slider("Annual Income (k$)", 15, 140, 60)
 spending = st.sidebar.slider("Spending Score (1-100)", 1, 100, 50)
 
 if st.sidebar.button("Predict Segment"):
-    result = model.predict(age, income, spending)
-    st.success(f"Predicted Segment: **{result['segment_name']}** (Cluster ID: {result['cluster_id']})")
+    result = predict_customer_segment(age, income, spending)
+    st.sidebar.success(f"Cluster ID: {result['cluster_id']}")
+    st.sidebar.info(f"Segment: {result['segment_name']}")
 
-# --- Load customer dataset ---
-st.sidebar.header("Load CSV for batch predictions")
-uploaded_file = st.sidebar.file_uploader("Upload CSV", type=["csv"])
+# Load all customer data with clusters
+df_clusters = get_all_customers()
 
-if uploaded_file:
-    df = pd.read_csv(uploaded_file)
-    batch_results = []
-    for _, row in df.iterrows():
-        pred = model.predict(row['Age'], row['Annual Income (k$)'], row['Spending Score (1-100)'])
-        batch_results.append(pred)
-    batch_df = df.copy()
-    batch_df['Cluster_ID'] = [r['cluster_id'] for r in batch_results]
-    batch_df['Segment_Name'] = [r['segment_name'] for r in batch_results]
-    st.write("Batch Predictions", batch_df)
+# Show summary stats
+st.subheader("Cluster Summary")
+summary = df_clusters.groupby("Cluster_Name")[["Age", "Annual Income (k$)", "Spending Score (1-100)"]].mean().round(1)
+st.dataframe(summary)
 
-# --- 3D Visualization ---
-st.header("3D Cluster Visualization")
-centroids = model.get_centroids(real=True)  # real, unscaled values
-df_clusters = model.get_all_customers()    # Returns df with Cluster_ID column
-
+# 3D Visualization
+st.subheader("3D Cluster Visualization")
 fig = px.scatter_3d(
     df_clusters,
     x="Age",
     y="Annual Income (k$)",
     z="Spending Score (1-100)",
     color="Cluster_Name",
-    size_max=8,
-    opacity=0.8,
-    hover_data=["Age", "Annual Income (k$)", "Spending Score (1-100)"]
+    hover_data=["Gender"],
+    height=600
 )
-
-fig.add_scatter3d(
-    x=centroids[:, 0],
-    y=centroids[:, 1],
-    z=centroids[:, 2],
-    mode="markers",
-    marker=dict(size=10, color='black', symbol='x'),
-    name="Centroids"
-)
-
 st.plotly_chart(fig, use_container_width=True)
-
-# --- Cluster Summary ---
-st.header("Cluster Summary Statistics")
-cluster_summary = model.get_cluster_summary()
-st.dataframe(cluster_summary)
